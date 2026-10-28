@@ -1,0 +1,97 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Check Git upload state",
+			"type": "shell",
+			"command": "git",
+			"args": [
+				"status",
+				"--short",
+				"--branch"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Check GitHub authentication",
+			"type": "shell",
+			"command": "gh",
+			"args": [
+				"auth",
+				"status"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Upload project to GitHub",
+			"type": "shell",
+			"command": "git",
+			"args": [
+				"init",
+				"-b",
+				"main"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Commit and push project",
+			"type": "shell",
+			"command": "git",
+			"args": [
+				"-c",
+				"user.name=SharmaHarshit6392",
+				"-c",
+				"user.email=SharmaHarshit6392@users.noreply.github.com",
+				"remote",
+				"add",
+				"origin",
+				"https://github.com/SharmaHarshit6392/sound_keys.git"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Fetch existing repository",
+			"type": "shell",
+			"command": "git",
+			"args": [
+				"fetch",
+				"origin",
+				"main"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Merge repository history",
+			"type": "shell",
+			"command": "git",
+			"args": [
+				"merge",
+				"FETCH_HEAD",
+				"--allow-unrelated-histories",
+				"--no-edit"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Create initial project commit",
+			"type": "shell",
+			"command": "git",
+			"args": [
+				"-c",
+				"user.name=SharmaHarshit6392",
+				"-c",
+				"user.email=SharmaHarshit6392@users.noreply.github.com",
+				"add",
+				"--all"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		}
+	]
+}
