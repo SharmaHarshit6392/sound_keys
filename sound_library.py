@@ -1,4 +1,5 @@
 import json
+import os
 import shutil
 from pathlib import Path
 
@@ -9,13 +10,33 @@ class SoundLibrary:
     """Manage imported audio files without altering their originals."""
 
     def __init__(self):
+        # Imported sounds and their index must be writable without admin rights.
+        local_app_data = Path(
+            os.environ.get("LOCALAPPDATA", Path.home() / "AppData" / "Local")
+        )
         self.root = Path(__file__).resolve().parent
-        self.library_dir = self.root / "sounds" / "custom"
-        self.index_file = self.root / "library.json"
+        self.user_data_dir = local_app_data / "SoundKeys"
+        self.library_dir = self.user_data_dir / "sounds" / "custom"
+        self.index_file = self.user_data_dir / "library.json"
 
         self.library_dir.mkdir(parents=True, exist_ok=True)
+        self._migrate_legacy_library()
 
         self.sounds = self._load_index()
+
+    def _migrate_legacy_library(self):
+        """Preserve custom sounds from older project-folder-based versions."""
+        legacy_dir = self.root / "sounds" / "custom"
+        if legacy_dir.is_dir():
+            for source in legacy_dir.iterdir():
+                if source.is_file() and source.suffix.lower() in {".mp3", ".wav", ".ogg", ".flac"}:
+                    destination = self.library_dir / source.name
+                    if not destination.exists():
+                        shutil.copy2(source, destination)
+
+        legacy_index = self.root / "library.json"
+        if not self.index_file.exists() and legacy_index.is_file():
+            shutil.copy2(legacy_index, self.index_file)
 
     def _load_index(self):
         """Load the saved library, recovering gracefully from bad JSON."""
