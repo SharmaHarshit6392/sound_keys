@@ -130,6 +130,7 @@ class SoundKeysApp(ctk.CTk):
         self.protocol("WM_DELETE_WINDOW", self.minimize_to_tray)
 
         self.after(150, self.sync_engine_status)
+
         if "--startup" in sys.argv:
             self._startup_pending = True
             self.after(500, self.start_soundkeys)
@@ -1480,9 +1481,9 @@ class SoundKeysApp(ctk.CTk):
                 f"Could not {action} SoundKeys:\n\n{error}",
                 parent=self,
             )
-
         if action == "start" and self._startup_pending:
             self._startup_pending = False
+
             if error is None and self.running:
                 self.after(300, self.minimize_to_tray)
 
