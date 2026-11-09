@@ -6,7 +6,7 @@ from pathlib import Path
 
 import keyboard
 import pygame
-from pygame import event
+
 import config
 
 
@@ -267,9 +267,17 @@ class SoundEngine:
         with self._lock:
             if not self.running or self.muted or self._closed:
                 return
-            channel = pygame.mixer.find_channel(False)
-            if channel is not None:
-                channel.play(sound)
+
+            try:
+            # Reuse an idle channel, or take over the longest-running
+            # sound when every channel is occupied.
+                channel = pygame.mixer.find_channel(force=True)
+
+                if channel is not None:
+                    channel.play(sound)
+
+            except pygame.error as error:
+               print(f"SoundKeys playback error: {error}")
 
     def _play_mechanical_key(self, key):
         special_name = self.MECHANICAL_SPECIAL_KEYS.get(key)
