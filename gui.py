@@ -79,6 +79,7 @@ class SoundKeysApp(ctk.CTk):
         self._exit_requested = threading.Event()
 
         self._closing = False
+        self._startup_pending = False
 
         self.tray_icon = None
         self._tray_available = False
@@ -130,7 +131,8 @@ class SoundKeysApp(ctk.CTk):
 
         self.after(150, self.sync_engine_status)
         if "--startup" in sys.argv:
-            self.after(500, self.minimize_to_tray)
+            self._startup_pending = True
+            self.after(500, self.start_soundkeys)
 
     def _resource_path(self, filename):
         """Resolve bundled assets in development and PyInstaller builds."""
@@ -384,7 +386,7 @@ class SoundKeysApp(ctk.CTk):
 
             header,
 
-            text="DESKTOP EDITION  •  v0.1",
+            text="DESKTOP EDITION  •  v1.0.0",
 
             font=("Consolas", 10),
 
@@ -1478,6 +1480,11 @@ class SoundKeysApp(ctk.CTk):
                 f"Could not {action} SoundKeys:\n\n{error}",
                 parent=self,
             )
+
+        if action == "start" and self._startup_pending:
+            self._startup_pending = False
+            if error is None and self.running:
+                self.after(300, self.minimize_to_tray)
 
         if action == "start" and self._pending_stop:
             self._pending_stop = False

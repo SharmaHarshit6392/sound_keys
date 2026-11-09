@@ -6,6 +6,7 @@ from pathlib import Path
 
 import keyboard
 import pygame
+from pygame import event
 import config
 
 
@@ -289,49 +290,70 @@ class SoundEngine:
             self._play(sound)
 
     def _on_key_press(self, event):
-        if event.event_type != "down":
+        # Ignore key-release events and invalid keyboard events.
+        if getattr(event, "event_type", None) != "down":
             return
-        key = event.name.lower()
 
+        event_name = getattr(event, "name", None)
+
+        if not event_name:
+            return
+
+        key = str(event_name).lower()
+
+        # Global mute shortcut (F8).
         if key == self.mute_key:
             self.toggle_mute()
             return
-        if key == "esc":
-            self.stop()
-            if self._on_exit:
-                try:
-                    self._on_exit()
-                except Exception as error:
-                    print(f"Exit callback error: {error}")
-            return
+
+        # Do nothing when SoundKeys is stopped.
         if not self.running:
             return
 
+        # ==========================================
+        # CHAOS MODE
+        # ==========================================
         if self.mode == "chaos":
+
+            # Enter plays the dedicated Enter sound.
             if key == self.enter_key:
                 sound = self.sounds.get(self.enter_filename)
+
                 if sound:
                     self._play(sound)
+
                 return
+
+            # Configured keys trigger random sounds.
             if key in self.trigger_keys:
                 choices = [
-                    sound for name, sound in self.sounds.items()
+                    sound
+                    for name, sound in self.sounds.items()
                     if name != self.enter_filename
                 ]
+
                 if choices:
                     self._play(random.choice(choices))
 
+        # ==========================================
+        # CUSTOM MODE
+        # ==========================================
         elif self.mode == "custom":
-            # ENTER is just another assignable key in Custom Mode.
+
             filename = self.custom_assignments.get(key)
+
             if filename:
                 sound = self.sounds.get(filename.lower())
+
                 if sound:
                     self._play(sound)
 
+        # ==========================================
+        # MECHANICAL MODE
+        # ==========================================
         elif self.mode == "mechanical":
-            self._play_mechanical_key(key)
 
+            self._play_mechanical_key(key)
     def close(self):
         with self._lock:
             if self._closed:
