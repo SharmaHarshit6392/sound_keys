@@ -2,7 +2,7 @@
 ; Keep this file in the project root, alongside SoundKeys.ico and the dist folder.
 
 #define MyAppName "SoundKeys"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.1.0"
 #define MyAppPublisher "SoundKeys"
 #define MyAppExeName "SoundKeys.exe"
 
@@ -17,7 +17,7 @@ DisableProgramGroupPage=yes
 UninstallDisplayIcon={app}\{#MyAppExeName}
 SetupIconFile=SoundKeys.ico
 OutputDir=Output
-OutputBaseFilename=SoundKeys_Setup
+OutputBaseFilename=SoundKeys-Setup-1.1.0
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern

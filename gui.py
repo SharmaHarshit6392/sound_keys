@@ -387,7 +387,7 @@ class SoundKeysApp(ctk.CTk):
 
             header,
 
-            text="DESKTOP EDITION  •  v1.0.0",
+            text="DESKTOP EDITION  •  v1.1.0",
 
             font=("Consolas", 10),
 
@@ -1340,6 +1340,9 @@ class SoundKeysApp(ctk.CTk):
                     with archive.open(info) as src, open(target, "wb") as dst:
                         shutil.copyfileobj(src, dst)
 
+            # Stop preview before replacing sound files.
+            self._stop_preview_sound()
+
             if self.engine is not None:
                 self.engine.stop()
                 self.engine.close()
@@ -1384,12 +1387,33 @@ class SoundKeysApp(ctk.CTk):
             self.sound_library = SoundLibrary()
             self.key_mapping = KeyMapping(self.sound_library)
             self._load_mechanical_settings()
-            self.refresh_library_list()
-            self.refresh_mapping_list()
-            self.refresh_mapping_sound_menu()
-            if hasattr(self, "volume_slider"):
-                self.volume_slider.set(self.master_volume)
-                self.volume_label.configure(text=f"{round(self.master_volume * 100)}%")
+            # Refresh only widgets belonging to the currently visible page.
+            if self.active_page == "HOME":
+                self.refresh_library_list()
+
+            elif self.active_page == "KEY MAPPING":
+                self.refresh_mapping_list()
+                self.refresh_mapping_sound_menu()
+            # Update volume controls only if their widgets still exist.
+            try:
+                if (
+                    hasattr(self, "volume_slider")
+                    and self.volume_slider.winfo_exists()
+                ):
+                    self.volume_slider.set(self.master_volume)
+            except Exception as error:
+                print(f"Volume slider refresh skipped: {error}")
+
+            try:
+                if (
+                    hasattr(self, "volume_label")
+                    and self.volume_label.winfo_exists()
+                ):
+                    self.volume_label.configure(
+                        text=f"{round(self.master_volume * 100)}%"
+                    )
+            except Exception as error:
+                print(f"Volume label refresh skipped: {error}")
             messagebox.showinfo("Restore complete", "Backup restored. Start SoundKeys again to use the restored settings.", parent=self)
         except Exception as error:
             messagebox.showerror("Restore failed", f"Could not restore this backup:\n\n{error}", parent=self)
@@ -1968,7 +1992,7 @@ class SoundKeysApp(ctk.CTk):
 
             if self.active_page == "KEY MAPPING" and hasattr(self, "mapping_sound_menu"):
 
-                self.refresh_mapping_sound_menu(imported[-1] if imported else None)
+                self.refresh_mapping_sound_menu()
 
             if imported:
 
@@ -2005,24 +2029,29 @@ class SoundKeysApp(ctk.CTk):
                 parent=self
 
             )
+    def _stop_preview_sound(self):
+        """Stop and release the currently tracked preview."""
+        if self.preview_sound is not None:
+            try:
+                self.preview_sound.stop()
+            except Exception as error:
+                print(f"Preview cleanup error: {error}")
+            finally:
+                self.preview_sound = None
 
     def preview_library_sound(self, filename):
+        self._stop_preview_sound()
 
         try:
-
             self.preview_sound = self.sound_library.preview(filename)
             self.preview_sound.set_volume(self.master_volume)
 
         except Exception as error:
-
+            self._stop_preview_sound()
             messagebox.showerror(
-
                 "Preview Error",
-
                 f"Could not play this sound:\n\n{error}",
-
                 parent=self
-
             )
 
     def remove_library_sound(self, filename):
@@ -2045,11 +2074,7 @@ class SoundKeysApp(ctk.CTk):
 
         try:
 
-            if self.preview_sound is not None:
-
-                self.preview_sound.stop()
-
-                self.preview_sound = None
+            self._stop_preview_sound()
 
             self.sound_library.remove_sound(filename)
 
@@ -2093,27 +2118,22 @@ class SoundKeysApp(ctk.CTk):
 
         return found
 
-    def refresh_mapping_sound_menu(self, preferred=None):
-
+    def refresh_mapping_sound_menu(self):
         if not hasattr(self, "mapping_sound_menu"):
-
             return
 
         sounds = sorted(self.available_mapping_sounds())
 
         self.mapping_sound_menu.configure(
-
             values=sounds if sounds else ["No sounds available"],
-
             state="normal" if sounds else "disabled"
-
         )
 
-        if sounds:
+        assigned = self.key_mapping.get_sound(self.selected_mapping_key)
 
-            current = preferred or self.mapping_sound_menu.get()
-
-            self.mapping_sound_menu.set(current if current in sounds else sounds[0])
+        self.mapping_sound_menu.set(
+            assigned if assigned in sounds else ""
+        )
 
     # ========================================================
 
@@ -2519,109 +2539,121 @@ class SoundKeysApp(ctk.CTk):
 
                 )
 
+        # Keep the selected key heading synchronized.
         if hasattr(self, "selected_key_title") and self.selected_key_title.winfo_exists():
-
             self.selected_key_title.configure(
-
                 text=f"SELECTED KEY: {self.selected_mapping_key.upper()}"
-
             )
 
+        # Show only the selected key's saved assignment.
+        if hasattr(self, "mapping_sound_menu") and self.mapping_sound_menu.winfo_exists():
+            self.refresh_mapping_sound_menu()
+
     def preview_selected_mapping_sound(self):
-
         if not hasattr(self, "mapping_sound_menu"):
-
             return
 
-        filename = self.mapping_sound_menu.get()
+        # Preview the currently selected candidate sound.
+        filename = self.mapping_sound_menu.get().strip()
 
         sound_path = self.available_mapping_sounds().get(filename)
 
         if sound_path is None:
-
-            messagebox.showinfo("SoundKeys", "Choose an available sound first.", parent=self)
-
+            messagebox.showinfo(
+                "SoundKeys",
+                "Select a sound from the dropdown before previewing.",
+                parent=self
+            )
             return
 
         try:
-
             if not pygame.mixer.get_init():
-
                 pygame.mixer.init()
 
-            if self.preview_sound is not None:
-
-                self.preview_sound.stop()
+            self._stop_preview_sound()
 
             self.preview_sound = pygame.mixer.Sound(str(sound_path))
             self.preview_sound.set_volume(self.master_volume)
             self.preview_sound.play()
 
         except Exception as error:
-
-            messagebox.showerror("Preview Error", f"Could not preview this sound:\n\n{error}", parent=self)
-
+            self._stop_preview_sound()
+            messagebox.showerror(
+                "Preview Error",
+                f"Could not preview this sound:\n\n{error}",
+                parent=self
+            )
     def refresh_mapping_list(self):
+        if not hasattr(self, "mapping_list"):
+            return
 
-        if not hasattr(self, "mapping_list") or not self.mapping_list.winfo_exists():
-
+        try:
+            if not self.mapping_list.winfo_exists():
+                return
+        except Exception:
             return
 
         for widget in self.mapping_list.winfo_children():
-
             widget.destroy()
 
         mappings = self.key_mapping.list_mappings()
 
         if not mappings:
-
             ctk.CTkLabel(
-
                 self.mapping_list,
-
                 text="No custom assignments yet.\nClick a key to get started!",
-
-                text_color=MUTED, font=("Segoe UI", 11), justify="center"
-
+                text_color=MUTED,
+                font=("Segoe UI", 11),
+                justify="center"
             ).pack(pady=25)
-
         else:
-
             for key, filename in sorted(mappings.items()):
-
                 row = ctk.CTkFrame(
-
-                    self.mapping_list, fg_color=PANEL_ALT, corner_radius=7
-
+                    self.mapping_list,
+                    fg_color=PANEL_ALT,
+                    corner_radius=7
                 )
-
                 row.pack(fill="x", padx=3, pady=3)
 
-                ctk.CTkLabel(
-
-                    row, text=key.upper(), width=48,
-
-                    text_color=BLUE, font=("Consolas", 11, "bold")
-
-                ).pack(side="left", padx=5, pady=9)
+                # Fixed-width key column.
+                row.grid_columnconfigure(1, weight=1)
 
                 ctk.CTkLabel(
+                    row,
+                    text=key.upper(),
+                    width=48,
+                    text_color=BLUE,
+                    font=("Consolas", 11, "bold")
+                ).grid(row=0, column=0, padx=5, pady=8)
 
-                    row, text=filename, text_color=WHITE,
+                # Flexible filename column.
+                ctk.CTkLabel(
+                    row,
+                    text=filename,
+                    text_color=WHITE,
+                    anchor="w",
+                    justify="left",
+                    font=("Segoe UI", 9),
+                    wraplength=190
+                ).grid(
+                    row=0,
+                    column=1,
+                    sticky="ew",
+                    padx=5,
+                    pady=7
+                )
 
-                    anchor="w", font=("Segoe UI", 9), wraplength=170
-
-                ).pack(side="left", fill="x", expand=True, padx=3, pady=7)
-
+                # Fixed-width remove button.
                 ctk.CTkButton(
-
-                    row, text="×", width=28, height=27,
-
-                    fg_color="#572038", hover_color="#842747",
-
+                    row,
+                    text="×",
+                    width=30,
+                    height=30,
+                    font=("Segoe UI", 12, "bold"),
+                    fg_color="#572038",
+                    hover_color="#842747",
                     command=lambda k=key: self.remove_key_mapping(k)
-
-                ).pack(side="right", padx=5, pady=5)
+                ).grid(row=0, column=2, padx=6, pady=5)
 
         self.update_mapping_selection()
 
@@ -2648,6 +2680,7 @@ class SoundKeysApp(ctk.CTk):
             self.key_mapping.assign(key, filename)
 
             self.refresh_mapping_list()
+            self.update_mapping_selection()
 
             messagebox.showinfo(
 
@@ -2682,6 +2715,7 @@ class SoundKeysApp(ctk.CTk):
             removed = self.key_mapping.remove(key)
 
             self.refresh_mapping_list()
+            self.update_mapping_selection()
 
             if not removed:
 
@@ -2733,7 +2767,7 @@ class SoundKeysApp(ctk.CTk):
 
         ctk.CTkLabel(
             panel,
-            text="VERSION 1.0.0  •  CYBERPUNK EDITION",
+            text="VERSION 1.1.0  •  CYBERPUNK EDITION",
             font=("Consolas", 11, "bold"),
             text_color=PURPLE
         ).pack(pady=5)
@@ -2966,12 +3000,7 @@ class SoundKeysApp(ctk.CTk):
                 print(f"Tray shutdown error: {error}")
             self.tray_icon = None
 
-        if self.preview_sound is not None:
-            try:
-                self.preview_sound.stop()
-            except Exception:
-                pass
-            self.preview_sound = None
+        self._stop_preview_sound()
 
         if self.engine is not None:
             try:

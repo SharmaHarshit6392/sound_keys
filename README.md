@@ -4,7 +4,7 @@
 
 SoundKeys is a Windows desktop app that plays sound effects when you press keyboard keys. Choose a sound style, customize key assignments, and control playback from a compact desktop interface.
 
-> **Release status:** Version 1.0.0 is being prepared. The tested Windows installer will be attached to the GitHub Release when the source and release package have been verified together.
+> **Release status:** SoundKeys v1.0.0 is published. Version v1.1.0 is currently under development and will be released after final Windows testing and packaging.
 
 ## Features
 
@@ -19,10 +19,10 @@ SoundKeys is a Windows desktop app that plays sound effects when you press keybo
 
 ## Download
 
-When the 1.0.0 release is published:
+Download the latest published version from the [GitHub Releases page](https://github.com/SharmaHarshit6392/sound_keys/releases).
 
-1. Open the [Releases page](https://github.com/SharmaHarshit6392/sound_keys/releases).
-2. Download **SoundKeys_Setup.exe** from the latest release.
+1. Open the Releases page.
+2. Download the Windows installer from the latest published release.
 3. Run the installer and follow the prompts.
 4. Launch SoundKeys from the Start menu or desktop shortcut.
 
@@ -36,9 +36,11 @@ Only download installers published under this repository's official Releases.
 
 ## Run from source
 
-The repository's source snapshot is being synchronized with the tested 1.0.0 build. Until that is complete, use the official release installer rather than assuming the current `main` branch reproduces the release.
+The v1.0.0 release is available under the `v1.0.0` Git tag.
 
-After the source snapshot is updated, development setup instructions and the exact supported Python version will be documented here.
+The v1.1.0 development version includes Windows stability improvements, improved key mapping and preview behaviour, and backup restoration fixes.
+
+Development setup instructions and the exact supported Python version will be documented before the v1.1.0 release.
 
 ## Audio files
 
