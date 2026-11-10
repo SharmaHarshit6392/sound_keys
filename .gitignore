@@ -11,9 +11,8 @@ env/
 # Packaging/build output
 build/
 dist/
-*.spec
-Output/
 *.egg-info/
+Output/
 
 # Local configuration and user data
 .env
@@ -30,3 +29,13 @@ Output/
 .DS_Store
 Thumbs.db
 Desktop.ini
+
+# Local backups and temporary files
+/installer/
+gui.py.before-startup-fix
+tempCodeRunnerFile.py
+*.bak
+*.tmp
+
+# Keep the application packaging configuration tracked
+!SoundKeys.spec

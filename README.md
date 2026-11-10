@@ -1,66 +1,97 @@
-# SoundKeys
+﻿# SoundKeys
 
 **Your keyboard. Your sound.**
 
-SoundKeys is a Windows desktop app that plays sound effects when you press keyboard keys. Choose a sound style, customize key assignments, and control playback from a compact desktop interface.
+SoundKeys is a Windows desktop application that turns keyboard input into sound effects. Choose a sound mode, configure key-to-sound assignments, manage a personal sound library, and control playback from the desktop interface.
 
-> **Release status:** SoundKeys v1.0.0 is published. Version v1.1.0 is currently under development and will be released after final Windows testing and packaging.
+> **Current release:** v1.1.0
+> **Platform:** Windows 10/11 (64-bit)
+> **Installer:** `SoundKeys-Setup-1.1.0.exe`
+
+## Screenshots
+
+### Control center
+
+![SoundKeys control center](docs/screenshots/control-center.png)
+
+### Key mapping
+
+![SoundKeys key mapping](docs/screenshots/key-mapping.png)
 
 ## Features
 
-- **Chaos Mode** — trigger randomized sound effects with selected keys.
-- **Custom Mode** — assign your own sound effects to supported keys.
-- **Mechanical Mode** — choose among Blue, Red, Brown, and Black keyboard sound profiles.
-- **Sound library** — import and preview your own audio files.
-- **Global keyboard detection** — sound effects can be triggered while working in other desktop applications.
-- **Quick controls** — start, stop, and mute playback.
-- **System tray** — keep SoundKeys running in the background.
-- **Backup and restore** — preserve your settings, mappings, and imported sounds.
+- **Chaos Mode** — play randomized sound effects when selected keys are pressed.
+- **Custom Mode** — assign individual sound effects to chosen keys.
+- **Mechanical Mode** — use mechanical-keyboard sound profiles, with profile selection and volume control.
+- **Interactive key mapping** — select a key, choose or import a sound, preview it, save the assignment, or remove it.
+- **Sound library** — import and preview supported audio files, including MP3, WAV, OGG, and FLAC.
+- **Global keyboard handling** — trigger sounds while working in other desktop applications.
+- **Playback controls** — start and stop the sound engine, mute playback, and adjust volume.
+- **System tray support** — keep the application accessible from the Windows notification area.
+- **Backup and restore** — export and restore SoundKeys settings, key mappings, and custom sound-library data.
 
-## Download
+## Download and installation
 
-Download the latest published version from the [GitHub Releases page](https://github.com/SharmaHarshit6392/sound_keys/releases).
+1. Open the [GitHub Releases page](https://github.com/SharmaHarshit6392/sound_keys/releases).
+2. Open the **SoundKeys 1.1.0** release.
+3. Download `SoundKeys-Setup-1.1.0.exe` from its Assets section.
+4. Run the installer and follow the setup prompts.
+5. Launch SoundKeys from the Start menu or the shortcut created by the installer.
 
-1. Open the Releases page.
-2. Download the Windows installer from the latest published release.
-3. Run the installer and follow the prompts.
-4. Launch SoundKeys from the Start menu or desktop shortcut.
+Only download installers from this repository's official GitHub Releases page. Windows may display a security warning for an independently distributed installer; verify that the file came from the official release before proceeding.
 
-Only download installers published under this repository's official Releases.
+## Using SoundKeys
+
+1. Launch SoundKeys.
+2. Choose **Chaos Mode**, **Custom Mode**, or **Mechanical Mode**.
+3. In Custom Mode, open **Key Mapping**, select a key, choose or import an audio effect, preview it, and save the assignment.
+4. Use the Home screen to start or stop the engine and control mute/volume.
+5. Use the Sound Library to import, preview, and manage your custom sound effects.
+6. Use the backup controls to export your settings and restore them later when needed.
+
+The exact keys and available sound profiles depend on the saved configuration and installed sound assets.
+
+## Run from source
+
+A Python source checkout requires the dependencies listed in `requirements.txt`.
+
+```powershell
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+py -m pip install --upgrade pip
+py -m pip install -r requirements.txt
+py gui.py
+```
+
+For the packaged application, use the Windows installer from the Releases page instead of installing Python dependencies manually.
 
 ## Requirements
 
 - Windows 10 or Windows 11, 64-bit.
 - A working audio output device.
-- The packaged installer is intended to include the runtime dependencies.
+- For running from source: Python and the packages in `requirements.txt`.
 
-## Run from source
+The released installer is intended to include the application runtime dependencies.
 
-The v1.0.0 release is available under the `v1.0.0` Git tag.
+## Privacy and keyboard permissions
 
-The v1.1.0 development version includes Windows stability improvements, improved key mapping and preview behaviour, and backup restoration fixes.
+SoundKeys uses a global keyboard hook so it can respond to configured key presses even when another application is active. Use it only on devices and accounts where you are authorized to run keyboard-hooking software. SoundKeys is designed to use key events to trigger local audio playback, not to record typed content.
 
-Development setup instructions and the exact supported Python version will be documented before the v1.1.0 release.
+## Audio licensing
 
-## Audio files
+Only import and distribute audio files that you created, have permission to use, or are otherwise properly licensed. Third-party sound files may have their own copyright and license terms; the MIT license for the application source code does not automatically apply to audio assets.
 
-SoundKeys supports importing personal sound effects into its sound library. Only use audio files that you created, have permission to use, or are otherwise properly licensed. Third-party sound files may have separate copyright and license terms; the MIT license for this project's code does not automatically apply to those audio files.
+## Reporting issues
 
-## Keyboard hook and privacy
+Bug reports and suggestions are welcome. When opening an issue, include:
 
-SoundKeys listens for keyboard events so it can react to configured key presses. Use it only on devices and accounts where you are authorized to run keyboard-hooking software. SoundKeys is intended to process key presses for local sound playback, not to record or transmit typed text.
-
-## Contributing
-
-Bug reports and suggestions are welcome. Please open an issue with:
 - Your Windows version.
 - The SoundKeys version.
 - Steps to reproduce the issue.
 - Any relevant error message.
 
-Please do not attach private data or unrelated audio files to issues.
+Do not attach private information or audio files unless you have permission to share them.
 
 ## License
 
 The application source code is licensed under the [MIT License](LICENSE).
-
